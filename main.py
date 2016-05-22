@@ -17,7 +17,7 @@ class Palette():
 		self.data = self.img.load()
 
 	def getPalette(self):
-		self.getImage('canyon.png')
+		self.getImage('tree.png')
 
 		# Current Row and Column iteration
 		row = 0
@@ -89,14 +89,11 @@ class Palette():
 				found = True
 
 		top = self.sortDict(self.aggr)
-		for i in top:
-			# Get Difference from sum of other numbers
-			# Here we will determine the "distance" of the color from the rest 
-			# by summing up the red, green, and blue values respecitvely
-			# Then we find the difference from the sum, and score that color on total distance
-			# We then select the top 6 most unique colors
-
-
+		difference_scores = {}
+		print(top[:10])
+	
+	def diff(self, ins):
+		print(ins[0])
 
 	def getHexCode(self, rgb):
 		shex = '{0:02x}{1:02x}{2:02x}'.format(rgb[0], rgb[1], rgb[2])
