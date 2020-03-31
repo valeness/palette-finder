@@ -1,4 +1,8 @@
-from PIL import Image
+import math
+
+from PIL import Image, ImageEnhance, ImageDraw
+from functools import reduce
+import numpy
 from time import sleep
 
 class Palette():
@@ -12,24 +16,64 @@ class Palette():
 
 	def getImage(self, path):
 		self.img = Image.open(path)
+		enhancer = ImageEnhance.Contrast(self.img)
+		self.img = enhancer.enhance(1.12)
+
+		# enhancer = ImageEnhance.Sharpness(self.img)
+		# self.img = enhancer.enhance(1.05)
+
+		enhancer = ImageEnhance.Brightness(self.img)
+		self.img = enhancer.enhance(1.05)
+
+		self.img.save('enhanced_image.png', 'PNG')
+
 		self.height = self.img.height
 		self.width = self.img.width
 		self.data = self.img.load()
 
+	def getColorDistance(self, c1, c2):
+		r1 = c1[0]
+		r2 = c2[0]
+
+		g1 = c1[1]
+		g2 = c2[1]
+
+		b1 = c1[2]
+		b2 = c2[2]
+
+		r_diff = pow(r1 - r2, 2)
+		g_diff = pow(g1 - g2, 2)
+		b_diff = pow(b1 - b2, 2)
+
+		distance = math.sqrt(r_diff + g_diff + b_diff)
+
+		return distance
+
+
 	def getPalette(self):
-		self.getImage('tree.png')
+		self.getImage('tree4.jpg')
 
 		# Current Row and Column iteration
 		row = 0
 		column = 0
 
 		# Tile Height/Width
-		size = 47
+		size = round(self.width / 10)
+		print(size)
 
-		# found tells wether or nto we have iterated over all tiles
+		# found tells whether or not we have iterated over all tiles
 		found = False
 		# current tile counter
 		counter = 0
+
+		new_colors = 0
+		# while not found:
+
+		#increment counter
+		counter += 1
+
+		# current x offset for tile
+		column_offset = size * column
 
 		while not found:
 
@@ -88,10 +132,44 @@ class Palette():
 				print('WE ARE FINISHED')
 				found = True
 
-		top = self.sortDict(self.aggr)
-		difference_scores = {}
-		print(top[:10])
-	
+		self.colors = {}
+		for color in self.aggr:
+			existing_color = self.color_diff(color)
+			if not existing_color:
+				print(existing_color)
+				# If the color is not in our dict, init the count to 1
+				# otherwise increment
+				if not color in self.colors:
+					self.colors[color] = 1
+				else:
+					self.colors[color] += 1
+			else:
+				self.colors[existing_color] += 1
+
+		self.colors = self.sortDict(self.colors)
+		print(self.colors)
+
+		# f = open('newimage.png', 'w')
+
+		im = Image.new('RGB', (500, 500))
+		offset = 0
+		for color in self.colors:
+			print(color[0])
+			draw = ImageDraw.Draw(im)
+			draw.rectangle([(offset, 0), (50 + offset, 50)], fill=color[0])
+			offset += 50
+		im.save('newimage.png', 'PNG')
+
+
+	def color_diff(self, main_color):
+
+		for color, score in self.colors.items():
+			distance = self.getColorDistance(main_color, color)
+			if(distance < 50):
+				return color
+		return False
+
+
 	def diff(self, ins):
 		print(ins[0])
 
