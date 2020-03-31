@@ -51,14 +51,14 @@ class Palette():
 
 
 	def getPalette(self):
-		self.getImage('tree4.jpg')
+		self.getImage('image7.jpg')
 
 		# Current Row and Column iteration
 		row = 0
 		column = 0
 
 		# Tile Height/Width
-		size = round(self.width / 10)
+		size = round(self.width / 25)
 		print(size)
 
 		# found tells whether or not we have iterated over all tiles
@@ -83,9 +83,9 @@ class Palette():
 			# current x offset for tile
 			column_offset = size * column
 
+
 			# iterate over x/y pixels of image
 			for x in range(column_offset, column_offset + size):
-
 				# current y ofset for tile
 				row_offset = size * row
 				for y in range(row_offset, row_offset + size):
@@ -135,7 +135,9 @@ class Palette():
 		self.colors = {}
 		for color in self.aggr:
 			existing_color = self.color_diff(color)
-			if not existing_color:
+			white_distance = self.getColorDistance((255, 255, 255), color)
+			black_distance = self.getColorDistance((0, 0, 0), color)
+			if not existing_color and white_distance > 55 and black_distance > 55:
 				print(existing_color)
 				# If the color is not in our dict, init the count to 1
 				# otherwise increment
@@ -143,7 +145,7 @@ class Palette():
 					self.colors[color] = 1
 				else:
 					self.colors[color] += 1
-			else:
+			elif white_distance > 55 and black_distance > 55:
 				self.colors[existing_color] += 1
 
 		self.colors = self.sortDict(self.colors)
@@ -165,7 +167,7 @@ class Palette():
 
 		for color, score in self.colors.items():
 			distance = self.getColorDistance(main_color, color)
-			if(distance < 50):
+			if(distance < 120):
 				return color
 		return False
 
