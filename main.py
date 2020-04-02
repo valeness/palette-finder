@@ -1,31 +1,34 @@
 import math
 
 from PIL import Image, ImageEnhance, ImageDraw
-from functools import reduce
-import numpy
-from time import sleep
+from os import listdir
+from os.path import isfile, join
+
 
 class Palette():
-	def __init__(self):
+	def __init__(self, image_name):
 		self.img = ''
 		self.data = ''
 		self.height = 0
 		self.width = 0
 		self.colors = {}
 		self.aggr = {}
+		self.image_name = image_name
+		self.distance_threshold = 120
+		self.tile_size = 15
 
 	def getImage(self, path):
-		self.img = Image.open(path)
+		self.img = Image.open('source_images/' + path)
 		enhancer = ImageEnhance.Contrast(self.img)
-		self.img = enhancer.enhance(1.12)
+		# self.img = enhancer.enhance(1.2)
 
 		# enhancer = ImageEnhance.Sharpness(self.img)
 		# self.img = enhancer.enhance(1.05)
 
 		enhancer = ImageEnhance.Brightness(self.img)
-		self.img = enhancer.enhance(1.05)
+		# self.img = enhancer.enhance(1.05)
 
-		self.img.save('enhanced_image.png', 'PNG')
+		# self.img.save('tmp_enhanced_image.png', 'PNG')
 
 		self.height = self.img.height
 		self.width = self.img.width
@@ -51,14 +54,21 @@ class Palette():
 
 
 	def getPalette(self):
-		self.getImage('image7.jpg')
+
+		trimmed_name = self.image_name.replace('.png', '').replace('.jpg', '')
+
+		if isfile('result_images/{0}_palette.png'.format(trimmed_name)):
+			return False
+
+
+		self.getImage(self.image_name)
 
 		# Current Row and Column iteration
 		row = 0
 		column = 0
 
 		# Tile Height/Width
-		size = round(self.width / 25)
+		size = round(self.width / self.tile_size)
 		print(size)
 
 		# found tells whether or not we have iterated over all tiles
@@ -137,7 +147,7 @@ class Palette():
 			existing_color = self.color_diff(color)
 			white_distance = self.getColorDistance((255, 255, 255), color)
 			black_distance = self.getColorDistance((0, 0, 0), color)
-			if not existing_color and white_distance > 55 and black_distance > 55:
+			if not existing_color and white_distance > 15 and black_distance > 15:
 				print(existing_color)
 				# If the color is not in our dict, init the count to 1
 				# otherwise increment
@@ -145,29 +155,37 @@ class Palette():
 					self.colors[color] = 1
 				else:
 					self.colors[color] += 1
-			elif white_distance > 55 and black_distance > 55:
+			elif white_distance > 15 and black_distance > 15:
 				self.colors[existing_color] += 1
 
 		self.colors = self.sortDict(self.colors)
 		print(self.colors)
 
+		if len(self.colors) < 5 and self.distance_threshold > 10:
+			self.distance_threshold -= 10
+			self.colors = {}
+			return self.getPalette()
+
 		# f = open('newimage.png', 'w')
 
-		im = Image.new('RGB', (500, 500))
+		im = Image.new('RGB', (250, 50))
+		square_size = math.floor(self.width / 15)
 		offset = 0
 		for color in self.colors:
 			print(color[0])
-			draw = ImageDraw.Draw(im)
-			draw.rectangle([(offset, 0), (50 + offset, 50)], fill=color[0])
-			offset += 50
-		im.save('newimage.png', 'PNG')
+			draw = ImageDraw.Draw(self.img)
+			draw.rectangle([(offset, self.height - square_size), (square_size + offset, self.height)], fill=color[0])
+			offset += square_size
+		# im.save('{0}_palette.png'.format(trimmed_name), 'PNG')
+		self.img.save('result_images/{0}_palette.png'.format(trimmed_name))
+		self.img.close()
 
 
 	def color_diff(self, main_color):
 
 		for color, score in self.colors.items():
 			distance = self.getColorDistance(main_color, color)
-			if(distance < 120):
+			if(distance < self.distance_threshold):
 				return color
 		return False
 
@@ -182,5 +200,10 @@ class Palette():
 	def sortDict(self, dicto):
 		return sorted(dicto.items(), key=lambda x: x[1], reverse=True)
 
-palette = Palette()
-palette.getPalette()
+onlyfiles = [f for f in listdir('source_images') if isfile(join('source_images', f))]
+
+for filename in onlyfiles:
+	print(filename)
+
+	palette = Palette(filename)
+	palette.getPalette()

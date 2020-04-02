@@ -2,3 +2,5 @@
 .vagrant/*
 .idea/
 venv/
+result_images
+source_images
