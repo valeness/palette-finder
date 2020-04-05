@@ -183,8 +183,7 @@ class Palette():
 		self.img.close()
 
 		hex_colors = []
-		for i in self.colors:
-			color = self.colors[i]
+		for color in self.colors:
 			color = color[0]
 			color = self.getHexCode(color)
 			hex_colors.append(color)
