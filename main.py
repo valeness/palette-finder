@@ -238,7 +238,11 @@ while True:
 		pal = palette.getPalette()
 		# ps = conn.pubsub()
 		# conn.publish('laravel_database_test-channel', "Job Done!")
-		conn.lpush('laravel_database_test-channel', json.dumps(pal))
+		payload = {
+			"palette" : pal,
+			"image_id" : payload.get('image_id')
+		}
+		conn.lpush('laravel_database_test-channel', json.dumps(payload))
 
 	except KeyboardInterrupt:
 		break
