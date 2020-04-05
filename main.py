@@ -181,7 +181,15 @@ class Palette():
 		# im.save('{0}_palette.png'.format(trimmed_name), 'PNG')
 		self.img.save('/var/www/html/storage/app/public/images/{0}_palette.png'.format(trimmed_name))
 		self.img.close()
-		return self.colors
+
+		hex_colors = []
+		for i in self.colors:
+			color = self.colors[i]
+			color = color[0]
+			color = self.getHexCode(color)
+			hex_colors.append(color)
+
+		return hex_colors
 
 
 	def color_diff(self, main_color):
