@@ -229,7 +229,8 @@ while True:
 		palette = Palette(file_path)
 		palette.getPalette()
 		# ps = conn.pubsub()
-		conn.publish('laravel_database_test-channel', "Job Done!")
+		# conn.publish('laravel_database_test-channel', "Job Done!")
+		conn.lpush('laravel_database_test-channel', "Job Done!")
 
 	except KeyboardInterrupt:
 		break
