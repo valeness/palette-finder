@@ -20,7 +20,7 @@ class Palette():
 		self.tile_size = 15
 
 	def getImage(self, path):
-		self.img = Image.open('/var/www/html/storage/app/public/' + path)
+		self.img = Image.open('/var/www/html/storage/app/public/images/' + path)
 		enhancer = ImageEnhance.Contrast(self.img)
 		# self.img = enhancer.enhance(1.2)
 
@@ -57,9 +57,9 @@ class Palette():
 
 	def getPalette(self):
 
-		trimmed_name = self.image_name.replace('.png', '').replace('.jpg', '')
+		trimmed_name = self.image_name.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
 
-		if isfile('/var/www/html/storage/app/public/{0}_palette.png'.format(trimmed_name)):
+		if isfile('/var/www/html/storage/app/public/images/{0}_palette.png'.format(trimmed_name)):
 			return False
 
 
@@ -179,7 +179,7 @@ class Palette():
 			draw.rectangle([(offset, self.height - square_size), (square_size + offset, self.height)], fill=color[0])
 			offset += square_size
 		# im.save('{0}_palette.png'.format(trimmed_name), 'PNG')
-		self.img.save('/var/www/html/storage/app/public/{0}_palette.png'.format(trimmed_name))
+		self.img.save('/var/www/html/storage/app/public/images/{0}_palette.png'.format(trimmed_name))
 		self.img.close()
 
 
@@ -207,8 +207,8 @@ class Palette():
 # for filename in onlyfiles:
 # 	print(filename)
 #
-	# palette = Palette(filename)
-	# palette.getPalette()
+# 	palette = Palette(filename)
+# 	palette.getPalette()
 
 
 conn = redis.Redis(host='localhost', port=6379, db=0)
