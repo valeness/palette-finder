@@ -1,8 +1,10 @@
+import json
 import math
 
 from PIL import Image, ImageEnhance, ImageDraw
 from os import listdir
 from os.path import isfile, join
+import redis
 
 
 class Palette():
@@ -18,7 +20,7 @@ class Palette():
 		self.tile_size = 15
 
 	def getImage(self, path):
-		self.img = Image.open('source_images/' + path)
+		self.img = Image.open('/var/www/html/storage/app/public/' + path)
 		enhancer = ImageEnhance.Contrast(self.img)
 		# self.img = enhancer.enhance(1.2)
 
@@ -57,7 +59,7 @@ class Palette():
 
 		trimmed_name = self.image_name.replace('.png', '').replace('.jpg', '')
 
-		if isfile('result_images/{0}_palette.png'.format(trimmed_name)):
+		if isfile('/var/www/html/storage/app/public/{0}_palette.png'.format(trimmed_name)):
 			return False
 
 
@@ -177,7 +179,7 @@ class Palette():
 			draw.rectangle([(offset, self.height - square_size), (square_size + offset, self.height)], fill=color[0])
 			offset += square_size
 		# im.save('{0}_palette.png'.format(trimmed_name), 'PNG')
-		self.img.save('result_images/{0}_palette.png'.format(trimmed_name))
+		self.img.save('/var/www/html/storage/app/public/{0}_palette.png'.format(trimmed_name))
 		self.img.close()
 
 
@@ -200,10 +202,32 @@ class Palette():
 	def sortDict(self, dicto):
 		return sorted(dicto.items(), key=lambda x: x[1], reverse=True)
 
-onlyfiles = [f for f in listdir('source_images') if isfile(join('source_images', f))]
+# onlyfiles = [f for f in listdir('source_images') if isfile(join('source_images', f))]
+#
+# for filename in onlyfiles:
+# 	print(filename)
+#
+	# palette = Palette(filename)
+	# palette.getPalette()
 
-for filename in onlyfiles:
-	print(filename)
 
-	palette = Palette(filename)
-	palette.getPalette()
+conn = redis.Redis(host='localhost', port=6379, db=0)
+
+while True:
+	try:
+
+		packed = conn.blpop('laravel_database_queues:getimagepalette', 30)
+
+		if not packed:
+			continue
+
+		payload = json.loads(packed[1])
+		job = payload.get('job')
+		file_path = payload.get('file_path')
+
+		print(job, file_path)
+		palette = Palette(file_path)
+		palette.getPalette()
+
+	except KeyboardInterrupt:
+		break
