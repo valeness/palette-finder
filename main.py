@@ -228,6 +228,8 @@ while True:
 		print(job, file_path)
 		palette = Palette(file_path)
 		palette.getPalette()
+		# ps = conn.pubsub()
+		conn.publish('laravel_database_test-channel', "Job Done!")
 
 	except KeyboardInterrupt:
 		break
