@@ -181,6 +181,7 @@ class Palette():
 		# im.save('{0}_palette.png'.format(trimmed_name), 'PNG')
 		self.img.save('/var/www/html/storage/app/public/images/{0}_palette.png'.format(trimmed_name))
 		self.img.close()
+		return self.colors
 
 
 	def color_diff(self, main_color):
@@ -227,10 +228,10 @@ while True:
 
 		print(job, file_path)
 		palette = Palette(file_path)
-		palette.getPalette()
+		pal = palette.getPalette()
 		# ps = conn.pubsub()
 		# conn.publish('laravel_database_test-channel', "Job Done!")
-		conn.lpush('laravel_database_test-channel', "Job Done!")
+		conn.lpush('laravel_database_test-channel', json.dumps(pal))
 
 	except KeyboardInterrupt:
 		break
